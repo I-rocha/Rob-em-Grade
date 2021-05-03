@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <math.h>
 
 #define white -1
 #define gray 0
@@ -44,12 +45,13 @@ std::vector<coord> adjList(graph* g, coord pos) {
  * flag => diz qual tipo de percurso é (1 = andar para cima e esquerda, 0 = andar somente para baixo e direita)
  * pos => posicao do vertice no grafo (linha == x, coluna == y)
  */
-int deepSearch(graph* g, coord pos, int flag, int* result1, int* result2) {
+int deepSearch(graph* g, coord pos, int flag, unsigned long* result1, unsigned long* result2) {
     int n = g->state[0].size() - 1; // Ultima posicao
     
     //pintaG
     g->state[pos.first][pos.second] = gray;
     
+
     //Se encontrou saida
     if (pos == std::make_pair(n, n)) {
         std::cout << "Encontrou a saida" << std::endl;
@@ -81,9 +83,11 @@ int deepSearch(graph* g, coord pos, int flag, int* result1, int* result2) {
 
 int main()
 {
-    int n = 0, i = 0, j = 0, result1 = 0, result2 = 0;
+    int n = 0, i = 0, j = 0;
     char aux;
-
+    unsigned long result1 = 0, result2 = 0, max = (pow(2.0, 31.0) - 1);
+    int normalized_1 = 0, normalized_2 = 0;
+   
     std::cin >> n;
     std::vector<std::vector<char>> map(n); // mapa
     std::vector<std::vector<int>> col(n); // cores dos vertices
@@ -101,11 +105,23 @@ int main()
     g.area = map;
     g.state = col;
 
-    //adjList(&g, std::make_pair(4,4));
     deepSearch(&g, std::make_pair(0, 0), 0, &result1, &result2);
+   
+    if (result1 != 0) {
+        normalized_1 = result1 % max;
+        std::cout << normalized_1;
+    }
+    else if (result2 != 0) {
+        std::cout << "THE GAME IS A LIE";
+    }
+    else {
+        std::cout << "INCONCEIVABLE";
+    }
+    
     std::cout << result2;
     
    
+
    //print(col);
 
 }
