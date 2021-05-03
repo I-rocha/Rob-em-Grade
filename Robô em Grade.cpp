@@ -7,7 +7,7 @@
 #define gray 0
 #define black 1
 
-std::vector<coord> stack;
+
 typedef struct {
     std::vector<std::vector<char>> area;
     std::vector<std::vector<int>> state; //Se foi ou nao visitado
@@ -16,6 +16,7 @@ typedef struct {
 
 typedef struct std::pair<int, int> coord;
 
+std::vector<coord> stack;
 
 std::vector<coord> adjList(graph* g, coord pos) {
     std::vector<coord> aux;
@@ -31,13 +32,11 @@ std::vector<coord> adjList(graph* g, coord pos) {
     return aux;
 }
 
-std::vector<coord> adjListLargeSearch(graph* g, coord pos) {
-    std::vector<coord> aux;
-
+int adjListLargeSearch(graph* g, coord pos) {
 
     if (!(pos.first + 1 >= g->state[0].size())) {
         if ((g->state)[pos.first + 1][pos.second] != black) {
-            aux.push_back(std::make_pair(pos.first + 1, pos.second));
+            stack.push_back(std::make_pair(pos.first + 1, pos.second));
             (g->state)[pos.first + 1][pos.second] = black;
         }
     }
@@ -45,7 +44,7 @@ std::vector<coord> adjListLargeSearch(graph* g, coord pos) {
 
     if (!(pos.second + 1 >= g->state[0].size())) {
         if ((g->state)[pos.first][pos.second + 1] != black) {
-            aux.push_back(std::make_pair(pos.first, pos.second + 1));
+            stack.push_back(std::make_pair(pos.first, pos.second + 1));
             (g->state)[pos.first][pos.second + 1] = black;
         }
     }
@@ -53,7 +52,7 @@ std::vector<coord> adjListLargeSearch(graph* g, coord pos) {
  
     if (!(pos.first - 1 < 0)) {
         if ((g->state)[pos.first - 1][pos.second] != black) {
-            aux.push_back(std::make_pair(pos.first - 1, pos.second));
+            stack.push_back(std::make_pair(pos.first - 1, pos.second));
             (g->state)[pos.first - 1][pos.second] = black;
         }    
     }
@@ -61,18 +60,19 @@ std::vector<coord> adjListLargeSearch(graph* g, coord pos) {
         
     if (!(pos.second - 1 < 0)) {
         if ((g->state)[pos.first][pos.second - 1] != black) {
-            aux.push_back(std::make_pair(pos.first, pos.second - 1));
+            stack.push_back(std::make_pair(pos.first, pos.second - 1));
             (g->state)[pos.first][pos.second - 1] = black;
         }    
     }
-    return aux;
+    return 1;
 }
 
 int largeSearch(graph* g, coord pos) {
     // n == posicao final
     int n = g->state[0].size() - 1;
-    std::vector<coord> adj;
     
+    // Remove ultima posicao da pilha
+    stack.pop_back();
     // Pinta estado
     g->state[pos.first][pos.second] = black;
 
@@ -80,15 +80,11 @@ int largeSearch(graph* g, coord pos) {
     if (pos == std::make_pair(n, n)) return 1;
 
     // Cria lista de adjacencia
-    adj = adjListLargeSearch(g, pos);
+    adjListLargeSearch(g, pos);
 
-    // Percorre toda a vizinhança
-    for (coord x : adj) {
-
-        // Se encontrar um caminho retorna
-        if (largeSearch(g, x)) return 1;
+    if (stack.size() > 0) {
+        return largeSearch(g, stack[stack.size() - 1]);
     }
-
 
     return 0;
 }
@@ -149,6 +145,9 @@ int main()
     g.paths = paths;
     g.paths[(unsigned long)n - 1][(unsigned long)n - 1] = 1; // Ultima posicao tem 1 caminho até ela mesma
     g.state[(unsigned long)n - 1][(unsigned long)n - 1] = gray; // Ultimo estado ja foi visitado
+    
+    
+    stack.push_back(std::make_pair(0, 0));
     std::cout << "Inicio da busca por profundidade" << std::endl;
     result = deepSearch(&g, std::make_pair(0, 0));
     std::cout << "Fim da busca por profundidade" << std::endl;
