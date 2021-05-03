@@ -44,11 +44,21 @@ std::vector<coord> adjList(graph* g, coord pos) {
  * flag => diz qual tipo de percurso é (1 = andar para cima e esquerda, 0 = andar somente para baixo e direita)
  * pos => posicao do vertice no grafo (linha == x, coluna == y)
  */
-int deepSearch(graph* g, coord pos, int flag) {
-    int result1 = 0, result2 = 0;
+int deepSearch(graph* g, coord pos, int flag, int* result1, int* result2) {
+    int n = g->state[0].size() - 1; // Ultima posicao
+    
     //pintaG
     g->state[pos.first][pos.second] = gray;
     
+    //Se encontrou saida
+    if (pos == std::make_pair(n, n)) {
+        std::cout << "Encontrou a saida" << std::endl;
+        if (!flag) (*result1)++;
+        else (*result2)++;
+        g->state[pos.first][pos.second] = white;
+        return *result2;
+    }
+
 
     std::vector<coord> list;
     // Monta lista de adjacencia
@@ -56,29 +66,22 @@ int deepSearch(graph* g, coord pos, int flag) {
 
     // x é a nova posicao para se mover
     for (std::pair<int,int>x : list) {
-        adj(list);
+        
         std::cout << x.first << ' ' << x.second << std::endl;
-        track(g->area, pos);
+        track(g->area, x);
         //Se andou para tras ou para cima
-        if ((x.first < pos.first) || (x.second < pos.second)) deepSearch(g, x, 1);
-        else deepSearch(g, x, flag);  
+        if ((x.first < pos.first) || (x.second < pos.second)) deepSearch(g, x, 1, result1, result2);
+        else deepSearch(g, x, flag, result1, result2);  
+        adj(list);
     }
 
-    int n = g->state[0].size()-1;
-    // Se encontrou a saida
-    if (pos == std::make_pair(n, n)) {
-        std::cout << "Encontrou a saida" << std::endl;
-        if (flag) result1++;
-        else result2++;
-    } 
-
     g->state[pos.first][pos.second] = white;
-    return result1;
+    return 0;
 }
 
 int main()
 {
-    int n = 0, i = 0, j = 0;
+    int n = 0, i = 0, j = 0, result1 = 0, result2 = 0;
     char aux;
 
     std::cin >> n;
@@ -99,7 +102,8 @@ int main()
     g.state = col;
 
     //adjList(&g, std::make_pair(4,4));
-    std::cout << deepSearch(&g, std::make_pair(0, 0), 0);
+    deepSearch(&g, std::make_pair(0, 0), 0, &result1, &result2);
+    std::cout << result2;
     
    
    //print(col);
