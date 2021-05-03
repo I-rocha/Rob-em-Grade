@@ -7,7 +7,7 @@
 #define gray 0
 #define black 1
 
-
+std::vector<coord> stack;
 typedef struct {
     std::vector<std::vector<char>> area;
     std::vector<std::vector<int>> state; //Se foi ou nao visitado
@@ -36,33 +36,33 @@ std::vector<coord> adjListLargeSearch(graph* g, coord pos) {
 
 
     if (!(pos.first + 1 >= g->state[0].size())) {
-        if ((g->state)[pos.first + 1][pos.second] == white) {
+        if ((g->state)[pos.first + 1][pos.second] != black) {
             aux.push_back(std::make_pair(pos.first + 1, pos.second));
-            (g->state)[pos.first + 1][pos.second] = gray;
+            (g->state)[pos.first + 1][pos.second] = black;
         }
     }
 
 
     if (!(pos.second + 1 >= g->state[0].size())) {
-        if ((g->state)[pos.first][pos.second + 1] == white) {
+        if ((g->state)[pos.first][pos.second + 1] != black) {
             aux.push_back(std::make_pair(pos.first, pos.second + 1));
-            (g->state)[pos.first][pos.second + 1] = gray;
+            (g->state)[pos.first][pos.second + 1] = black;
         }
     }
 
  
     if (!(pos.first - 1 < 0)) {
-        if ((g->state)[pos.first - 1][pos.second] == white) {
+        if ((g->state)[pos.first - 1][pos.second] != black) {
             aux.push_back(std::make_pair(pos.first - 1, pos.second));
-            (g->state)[pos.first - 1][pos.second] = gray;
+            (g->state)[pos.first - 1][pos.second] = black;
         }    
     }
 
         
     if (!(pos.second - 1 < 0)) {
-        if ((g->state)[pos.first][pos.second - 1] == white) {
+        if ((g->state)[pos.first][pos.second - 1] != black) {
             aux.push_back(std::make_pair(pos.first, pos.second - 1));
-            (g->state)[pos.first][pos.second - 1] = gray;   
+            (g->state)[pos.first][pos.second - 1] = black;
         }    
     }
     return aux;
@@ -102,10 +102,8 @@ int deepSearch(graph* g, coord pos) {
     int n = g->state[0].size() - 1; // n == posicao final
     unsigned long result = 0, normalized = 0, max = (pow(2.0, 31.0) - 1);
 
-    ////pintaG
+    // pintaG
     g->state[pos.first][pos.second] = gray;
-
-
 
     std::vector<coord> list;
     // Monta lista de adjacencia
@@ -115,14 +113,11 @@ int deepSearch(graph* g, coord pos) {
     for (coord x : list) {
         if (g->state[x.first][x.second] == gray) {
             result += g->paths[x.first][x.second];
-            std::cout << "ja tem valor" << std::endl;
         }
         else {
-            std::cout << "recursao" << std::endl;
             result += deepSearch(g, x);
         }
     }
-    std::cout << result << std::endl;
     normalized = result % max;
     g->paths[pos.first][pos.second] = normalized;
     return normalized;
@@ -152,19 +147,21 @@ int main()
     g.area = map;
     g.state = col;
     g.paths = paths;
-    g.paths[n - 1][n - 1] = 1; // Ultima posicao tem 1 caminho até ela mesma
-    g.state[n - 1][n - 1] = gray; // Ultimo estado ja foi visitado
-
+    g.paths[(unsigned long)n - 1][(unsigned long)n - 1] = 1; // Ultima posicao tem 1 caminho até ela mesma
+    g.state[(unsigned long)n - 1][(unsigned long)n - 1] = gray; // Ultimo estado ja foi visitado
+    std::cout << "Inicio da busca por profundidade" << std::endl;
     result = deepSearch(&g, std::make_pair(0, 0));
-  /*  std::cout << g.state[4][4] << std::endl;
+    std::cout << "Fim da busca por profundidade" << std::endl;
+    /*  std::cout << g.state[4][4] << std::endl;
     std::cout << g.paths[4][4] << std::endl;*/
-
+    std::cout << "Vai comecar a busca por largura" << std::endl;
+    system("pause");
     if (result != 0) {
         normalized = result % max;
-        std::cout << normalized;
+        std::cout << normalized << "\n";
     } else if(largeSearch(&g, std::make_pair(0,0)))
-        std::cout << "THE GAME IS A LIE";
+        std::cout << "THE GAME IS A LIE\n";
     else{
-        std::cout << "INCONCEIVABLE";
+        std::cout << "INCONCEIVABLE\n";
     }
 }
