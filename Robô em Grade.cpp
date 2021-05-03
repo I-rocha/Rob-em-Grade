@@ -5,7 +5,7 @@
 #define white -1
 #define gray 0
 #define black 1
-
+//
 
 typedef struct {
     std::vector<std::vector<char>> area;
