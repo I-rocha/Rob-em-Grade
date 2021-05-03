@@ -11,6 +11,7 @@
 typedef struct {
     std::vector<std::vector<char>> area;
     std::vector<std::vector<int>> state; //Se foi ou nao visitado
+    std::vector<std::vector<unsigned long>> paths;
 }graph;
 
 typedef struct std::pair<int, int> coord;
@@ -20,11 +21,11 @@ std::vector<coord> adjList(graph* g, coord pos) {
     std::vector<coord> aux;
     
     if (!(pos.first + 1 >= g->state[0].size())) {
-        if ((g->state)[pos.first + 1][pos.second] == white) aux.push_back(std::make_pair(pos.first + 1, pos.second));    
+        if ((g->state)[pos.first + 1][pos.second] != black) aux.push_back(std::make_pair(pos.first + 1, pos.second));    
     }
   
     if (!(pos.second + 1 >= g->state[0].size())) {
-        if ((g->state)[pos.first][pos.second + 1] == white) aux.push_back(std::make_pair(pos.first, pos.second + 1));
+        if ((g->state)[pos.first][pos.second + 1] != black) aux.push_back(std::make_pair(pos.first, pos.second + 1));
     }
     
     return aux;
@@ -97,16 +98,14 @@ int largeSearch(graph* g, coord pos) {
  * flag => diz qual tipo de percurso é (1 = andar para cima e esquerda, 0 = andar somente para baixo e direita)
  * pos => posicao do vertice no grafo (linha == x, coluna == y)
  */
-int deepSearch(graph* g, coord pos, int flag, unsigned long* result) {
+int deepSearch(graph* g, coord pos) {
     int n = g->state[0].size() - 1; // n == posicao final
+    unsigned long result = 0, normalized = 0, max = (pow(2.0, 31.0) - 1);
 
-    //pintaG
+    ////pintaG
     g->state[pos.first][pos.second] = gray;
 
-    //Se encontrou saida
-    if (pos == std::make_pair(n, n)) {
-       (*result)++;
-    }
+
 
     std::vector<coord> list;
     // Monta lista de adjacencia
@@ -114,26 +113,31 @@ int deepSearch(graph* g, coord pos, int flag, unsigned long* result) {
 
     // x é a nova posicao para se mover
     for (coord x : list) {
-
-        deepSearch(g, x, flag, result);
-    
+        if (g->state[x.first][x.second] == gray) {
+            result += g->paths[x.first][x.second];
+            std::cout << "ja tem valor" << std::endl;
+        }
+        else {
+            std::cout << "recursao" << std::endl;
+            result += deepSearch(g, x);
+        }
     }
-
-    g->state[pos.first][pos.second] = white;
-    return 0;
+    std::cout << result << std::endl;
+    normalized = result % max;
+    g->paths[pos.first][pos.second] = normalized;
+    return normalized;
 }
 
 int main()
 {
     int n = 0, i = 0, j = 0;
     char aux;
-    unsigned long result = 0, max = (pow(2.0, 31.0) - 1);
-    int normalized_1 = 0, normalized_2 = 0;
+    unsigned long result = 0, max = (pow(2.0, 31.0) - 1), normalized = 0;
 
     std::cin >> n;
     std::vector<std::vector<char>> map(n); // mapa
     std::vector<std::vector<int>> col(n); // cores dos vertices
-
+    std::vector<std::vector<unsigned long>> paths(n, std::vector<unsigned long>(n,0)); // Caminhos possíveis até a saída
 
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
@@ -147,12 +151,17 @@ int main()
     graph g;
     g.area = map;
     g.state = col;
+    g.paths = paths;
+    g.paths[n - 1][n - 1] = 1; // Ultima posicao tem 1 caminho até ela mesma
+    g.state[n - 1][n - 1] = gray; // Ultimo estado ja foi visitado
 
-    deepSearch(&g, std::make_pair(0, 0), 0, &result);
+    result = deepSearch(&g, std::make_pair(0, 0));
+  /*  std::cout << g.state[4][4] << std::endl;
+    std::cout << g.paths[4][4] << std::endl;*/
 
     if (result != 0) {
-        normalized_1 = result % max;
-        std::cout << normalized_1;
+        normalized = result % max;
+        std::cout << normalized;
     } else if(largeSearch(&g, std::make_pair(0,0)))
         std::cout << "THE GAME IS A LIE";
     else{
