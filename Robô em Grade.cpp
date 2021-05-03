@@ -148,13 +148,9 @@ int main()
     
     
     stack.push_back(std::make_pair(0, 0));
-    std::cout << "Inicio da busca por profundidade" << std::endl;
     result = deepSearch(&g, std::make_pair(0, 0));
-    std::cout << "Fim da busca por profundidade" << std::endl;
     /*  std::cout << g.state[4][4] << std::endl;
     std::cout << g.paths[4][4] << std::endl;*/
-    std::cout << "Vai comecar a busca por largura" << std::endl;
-    system("pause");
     if (result != 0) {
         normalized = result % max;
         std::cout << normalized << "\n";
