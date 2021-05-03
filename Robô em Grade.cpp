@@ -20,22 +20,25 @@ void track(std::vector<std::vector<char>> map, coord pos);
 void adj(std::vector<std::pair<int, int>> neighbour);
 
 
-std::vector<coord> adjList(graph* g, coord pos) {
+std::vector<coord> adjList(graph* g, coord pos, int fg) {
     std::vector<coord> aux;
-    if (!(pos.first + 1 >= g->state[0].size())) {
-        if ((g->state)[pos.first + 1][pos.second] == white) aux.push_back(std::make_pair(pos.first + 1, pos.second));
-    }
+    if (fg == 0) {
+        if (!(pos.first + 1 >= g->state[0].size())) {
+            if ((g->state)[pos.first + 1][pos.second] == white) aux.push_back(std::make_pair(pos.first + 1, pos.second));
+        }
 
-    if (!(pos.second + 1 >= g->state[0].size())) {
-        if ((g->state)[pos.first][pos.second + 1] == white) aux.push_back(std::make_pair(pos.first, pos.second + 1));
+        if (!(pos.second + 1 >= g->state[0].size())) {
+            if ((g->state)[pos.first][pos.second + 1] == white) aux.push_back(std::make_pair(pos.first, pos.second + 1));
+        }
     }
+    else if (fg == 1) {
+        if (!(pos.first - 1 < 0)) {
+            if ((g->state)[pos.first - 1][pos.second] == white) aux.push_back(std::make_pair(pos.first - 1, pos.second));
+        }
 
-    if (!(pos.first - 1 < 0)) {
-        if ((g->state)[pos.first - 1][pos.second] == white) aux.push_back(std::make_pair(pos.first - 1, pos.second));
-    }
-
-    if (!(pos.second - 1 < 0)) {
-        if ((g->state)[pos.first][pos.second - 1] == white) aux.push_back(std::make_pair(pos.first, pos.second - 1));
+        if (!(pos.second - 1 < 0)) {
+            if ((g->state)[pos.first][pos.second - 1] == white) aux.push_back(std::make_pair(pos.first, pos.second - 1));
+        }
     }
     return aux;
 }
@@ -45,7 +48,7 @@ std::vector<coord> adjList(graph* g, coord pos) {
  * flag => diz qual tipo de percurso é (1 = andar para cima e esquerda, 0 = andar somente para baixo e direita)
  * pos => posicao do vertice no grafo (linha == x, coluna == y)
  */
-int deepSearch(graph* g, coord pos, int flag, unsigned long* result1, unsigned long* result2) {
+int deepSearch(graph* g, coord pos, int flag, unsigned long* result1, unsigned long* result2, int fg) {
     int n = g->state[0].size() - 1; // Ultima posicao
 
     //pintaG
@@ -64,7 +67,7 @@ int deepSearch(graph* g, coord pos, int flag, unsigned long* result1, unsigned l
 
     std::vector<coord> list;
     // Monta lista de adjacencia
-    list = adjList(g, pos);
+    list = adjList(g, pos, fg);
 
     // x é a nova posicao para se mover
     for (std::pair<int, int>x : list) {
@@ -72,8 +75,8 @@ int deepSearch(graph* g, coord pos, int flag, unsigned long* result1, unsigned l
         std::cout << x.first << ' ' << x.second << std::endl;
         track(g->area, x);
         //Se andou para tras ou para cima
-        if ((x.first < pos.first) || (x.second < pos.second)) deepSearch(g, x, 1, result1, result2);
-        else deepSearch(g, x, flag, result1, result2);
+        if ((x.first < pos.first) || (x.second < pos.second)) deepSearch(g, x, 1, result1, result2, fg);
+        else deepSearch(g, x, flag, result1, result2, fg);
         adj(list);
     }
 
@@ -105,13 +108,14 @@ int main()
     g.area = map;
     g.state = col;
 
-    deepSearch(&g, std::make_pair(0, 0), 0, &result1, &result2);
-
+    deepSearch(&g, std::make_pair(0, 0), 0, &result1, &result2, 0);
+    
     if (result1 != 0) {
         normalized_1 = result1 % max;
         std::cout << normalized_1;
     }
-    else if (result2 != 0) {
+    deepSearch(&g, std::make_pair(0, 0), 0, &result1, &result2, 1);
+    if (result2 != 0) {
         std::cout << "THE GAME IS A LIE";
     }
     else {
